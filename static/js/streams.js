@@ -1,6 +1,8 @@
 const APP_ID = '5184dff46f5349428b4cec8530acddcb'
-const TOKEN = '0065184dff46f5349428b4cec8530acddcbIADvANz6+B6/izv+GbAsp7ktM8JIeP6bBTGSPOBL1pecyGTNKL+TUlORIgArKoIAX1hvZgQAAQBfWG9mAgBfWG9mAwBfWG9mBABfWG9m+B6/izv+GbAsp7ktM8JIeP6bBTGSPOBL1pecyGTNKL+TUlORIgArKoIAX1hvZgQAAQBfWG9mAgBfWG9mAwBfWG9mBABfWG9m/enZKHRHwz+LmmzT/Q8RL6xmbeCwKKhT/pAorMJgaWpikpKWZmKWZGptYmhhZJJkkpyZbmBobJCanpCQn9StnpzUEMjLYBocwMzJAIIjPwpCbmJnHwAAAd2kfHA=='
-const CHANNEL = 'main'
+const TOKEN = sessionStorage.getItem('token')
+const CHANNEL = sessionStorage.getItem('room')
+let UID = sessionStorage.getItem('UID')
+let NAME = sessionStorage.getItem('name')
 
 const client = AgoraRTC.creatClient({mode:'rtc', codec:'vp8'})
 
@@ -8,10 +10,18 @@ let localTracks = []
 let remoteUser = {}     //stores the user joined
 
 let joinAndDisplayLocalStream = async () => {
+    document.getElementById('room-name').innerText = CHANNEL
+
     client.on('user-published', handleUserJoined)
     client.on('user-left', handleUserLeft)
 
-    UID = await client.join(APP_ID, TOKEN, CHANNEL, null)
+    try {
+        await client.join(APP_ID, TOKEN, CHANNEL, UID)
+    }catch(error){
+        console.error(error)
+        window.open('/','_self')
+    }
+    
 
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks()
 
