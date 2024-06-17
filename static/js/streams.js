@@ -9,10 +9,11 @@ const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 let localTracks = []
 let remoteUsers = {}     //stores the user joined
 
+console.log("hello")
 let joinAndDisplayLocalStream = async () => {
     document.getElementById('room-name').innerText = CHANNEL
 
-    client.on('user-published', handleUserJoined)
+    client.on("user-published", handleUserJoined)
     client.on('user-left', handleUserLeft)
 
     try {
@@ -35,7 +36,7 @@ let joinAndDisplayLocalStream = async () => {
 
             document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
             localTracks[1].play(`user-${UID}`)
-            await client.publish(localTracks[1], localTracks[0])
+            await client.publish(localTracks[0], localTracks[1])
 }
 
 let handleUserJoined = async (user, mediaType) => {
@@ -75,6 +76,8 @@ let leaveAndRemoveLocalStream = async () => {
         localTracks[i].stop()
         localTracks[i].close()
     }
+
+    deleteMember()
 
     await client.leave()
     window.open('/','_self')
@@ -116,7 +119,20 @@ let getMember = async (user) => {
     let member = await response.json()
     return member
 }
+
+let deleteMember = async () => {
+    let response = await fetch('/delete_member/', {
+        method:'POST',
+        headers: {
+            'Content-Type':'application/json'
+        },
+        body:JSON.stringify({'name':NAME, 'room_name':CHANNEL, 'UID':UID})
+    })
+}
+
 joinAndDisplayLocalStream()
+
+window.addEventListener('beforeunload', deleteMember)
 
 document.getElementById('leave-btn').addEventListener('click',leaveAndRemoveLocalStream)
 document.getElementById('mic-btn').addEventListener('click',toggleMic)
