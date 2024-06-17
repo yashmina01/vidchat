@@ -4,7 +4,7 @@ const CHANNEL = sessionStorage.getItem('room')
 let UID = sessionStorage.getItem('UID')
 let NAME = sessionStorage.getItem('name')
 
-const client = AgoraRTC.creatClient({mode:'rtc', codec:'vp8'})
+const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
 let localTracks = []
 let remoteUser = {}     //stores the user joined
@@ -25,9 +25,11 @@ let joinAndDisplayLocalStream = async () => {
 
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks()
 
+    let member = await createMember()
+
     let player = `<div  class="video-container" id="user-container-${UID}">
                      <div class="video-player" id="user-${UID}"></div>
-                     <div class="username-wrapper"><span class="user-name">${UID}</span></div>
+                     <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
                   </div>`
     document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
 
@@ -92,6 +94,19 @@ let toggleMic = async(e) =>{
         await localTracks[0].setMuted(true)
         e.target.style.backgroundColor = 'rgb(255, 80, 80, 1)'
     }
+}
+
+let createMember = async () => {
+    let respone = await fetch('/create_member/', {
+        method:"POST",
+        headers:{
+            'Content-Type':'application/json'
+        },
+        body:JSON.stringify({'name':NAME,'uid':UID, 'room_name':CHANNEL})
+    })
+
+    let member = await Response.json()
+    return member
 }
 
 document.getElementById('leave-btn').addEventListener('click',leaveAndRemoveLocalStream)

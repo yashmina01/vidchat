@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from agora_token_builder import RtcTokenBuilder
+from .models import RoomMember
 import random
-import time
+import time,json
 
 # Create your views here.
 
@@ -24,3 +25,13 @@ def lobby(request):
 
 def room(request):
     return render(request, 'base/room.html')
+
+def CreateMember(request):
+    data = json.loads(request.body)
+    
+    member, created = RoomMember.objects.get_or_create(
+        name = data['name'],
+        uid = data['uid'],
+        room_name = data['room_name']
+    )
+    return JsonResponse({'name':data['name']}, safe=False)
