@@ -32,12 +32,10 @@ let joinAndDisplayLocalStream = async () => {
                      <div class="video-player" id="user-${UID}"></div>
                      <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
                   </div>`
-    document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
 
-    localTracks[1].play(`user-${UID}`)
-
-    await client.publish([localTracks[0], localTracks[1]])  //other user can also see audio and video tracks
-        
+            document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
+            localTracks[1].play(`user-${UID}`)
+            await client.publish(localTracks[1], localTracks[0])
 }
 
 let handleUserJoined = async (user, mediaType) => {
@@ -50,23 +48,25 @@ let handleUserJoined = async (user, mediaType) => {
         if(player != null){ //user is already in the stream
             player.remove()
         }
+        
+        let member = await getMember(user)
 
         player = `<div  class="video-container" id="user-container-${user.uid}">
                         <div class="video-player" id="user-${user.uid}"></div>
-                        <div class="username-wrapper"><span class="user-name">${user.uid}</span></div>
+                        <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
                     </div>`
         document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
         user.videoTrack.play(`user-${user.uid}`)
     }
 
-    if(mediaType == 'audio'){
+    if(mediaType === 'audio'){
         user.audioTrack.play()
     }
 };
 
 let handleUserLeft = async (user) =>{
     delete remoteUsers[user.uid]
-    document.getElementById('user-container-${user.uid}').remove()
+    document.getElementById(`user-container-${user.uid}`).remove()
 }
 
 let leaveAndRemoveLocalStream = async () => {
@@ -111,9 +111,13 @@ let createMember = async () => {
     return member
 }
 
+let getMember = async (user) => {
+    let response = await fetch(`/get_member/?UID=${user.uid}&room_name=${CHANNEL}`)
+    let member = await response.json()
+    return member
+}
+joinAndDisplayLocalStream()
 
 document.getElementById('leave-btn').addEventListener('click',leaveAndRemoveLocalStream)
 document.getElementById('mic-btn').addEventListener('click',toggleMic)
 document.getElementById('camera-btn').addEventListener('click',toggleCamera)
-
-joinAndDisplayLocalStream()
