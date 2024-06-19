@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-!70yqlw&w7=5+pm*v49rsb1+*_9^q8tvi007&iew$=@8utcqkj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['vidchat-production.up.railway.app']
 
 
 # Application definition
